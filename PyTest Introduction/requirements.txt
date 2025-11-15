@@ -1,0 +1,6 @@
+pandas==2.2.3
+pytest==7.4.0
+pytest-html==3.0.0
+py==1.11.0
+
+# Add any other test dependencies here
