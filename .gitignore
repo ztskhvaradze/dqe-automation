@@ -64,9 +64,6 @@ Thumbs.db
 .env.*.local
 credentials.json
 
-# Reports and archives (optional - keep if you want to track specific reports)
-report*.html
-*.zip
 
 # Large data / generated files (uncomment if you don't want to track data files)
 # /data_dev/
