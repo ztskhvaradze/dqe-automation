@@ -1,0 +1,90 @@
+# Python related
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+pip-wheel-metadata/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+venv.bak/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+coverage.xml
+nosetests.xml
+
+# IDEs and editors
+.idea/
+*.iml
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and local databases
+*.log
+*.sqlite3
+
+# Environment/secrets
+.env
+.env.local
+.env.*.local
+credentials.json
+
+# Reports and archives (optional - keep if you want to track specific reports)
+report*.html
+*.zip
+
+# Large data / generated files (uncomment if you don't want to track data files)
+# /data_dev/
+# /data/
+# *.parquet
+# *.csv
+
+# Caches and type checkers
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Misc
+*.pot
+*.mo
+
+# Compiled python
+*.pyc
+*.pyo
+*.pyd
+
