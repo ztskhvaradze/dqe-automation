@@ -1,5 +1,5 @@
 import pytest
-import os # <-- Import the os module to access environment variables
+import os 
 from src.connectors.postgres.postgres_connector import PostgresConnectorContextManager
 from src.connectors.file_system.parquet_reader import ParquetReader
 import pandas as pd
@@ -7,19 +7,22 @@ import pandas as pd
 
 @pytest.fixture(scope="session")
 def db_connection():
-    # Correct container credentials
-    host = "localhost"
+    # CRITICAL FIX: The host must be the Windows host's IPv4 address 
+    # to allow the Jenkins container to access the Podman-mapped port.
+    host = "192.168.0.103"  # <-- Set this to your stable Windows IPv4 Address
+
     db_name = "mydatabase"
     user = "myuser"
     
-    # --- CHANGE START ---
-    # Retrieve the password from an environment variable.
-    # We use a placeholder 'default_secret' only for local testing if the variable isn't set.
-    # In Jenkins, this must be set by the 'withCredentials' block.
-    password = os.environ.get("POSTGRES_PASSWORD", "default_secret") 
-    # --- CHANGE END ---
+    # SECURITY FIX: Retrieve the password from the environment variable 
+    # set by the Jenkins pipeline.
+    password = os.environ.get("POSTGRES_PASSWORD") 
     
     port = 5434
+
+    # Ensure password is set before attempting connection
+    if not password:
+        raise ValueError("POSTGRES_PASSWORD environment variable is not set. Cannot connect to database.")
 
     with PostgresConnectorContextManager(
         db_host=host,
