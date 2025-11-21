@@ -7,15 +7,15 @@ import pandas as pd
 
 @pytest.fixture(scope="session")
 def db_connection():
-    # CRITICAL FIX: The host must be the Windows host's IPv4 address 
-    # to allow the Jenkins container to access the Podman-mapped port.
-    host = "192.168.0.103"  # <-- Set this to your stable Windows IPv4 Address
+    # CRITICAL FIX: Use 'host.docker.internal' instead of a specific IP.
+    # This resolves to the host machine's internal IP address, bypassing 
+    # the external Windows Firewall that was causing the 'Connection timed out'.
+    host = "host.docker.internal"
 
     db_name = "mydatabase"
     user = "myuser"
     
-    # SECURITY FIX: Retrieve the password from the environment variable 
-    # set by the Jenkins pipeline.
+    # Retrieve the password from the environment variable set by Jenkins
     password = os.environ.get("POSTGRES_PASSWORD") 
     
     port = 5434
