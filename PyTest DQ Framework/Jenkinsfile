@@ -23,6 +23,7 @@ pipeline {
             steps {
                 sh '''
                     . .venv/bin/activate
+                    export PYTHONPATH="$PYTHONPATH:$(pwd)/PyTest DQ Framework"
                     .venv/bin/python -m scripts.run_dq_checks
                 '''
             }
@@ -32,6 +33,7 @@ pipeline {
             steps {
                 sh '''
                     . .venv/bin/activate
+                    export PYTHONPATH="$PYTHONPATH:$(pwd)/PyTest DQ Framework"
                     .venv/bin/pytest tests -m "parquet_data" \
                         --db_host="postgres" \
                         --db_port="5432" \
