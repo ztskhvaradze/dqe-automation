@@ -1,8 +1,13 @@
 pipeline {
     agent any
+    
+    // Define the secret variables in the environment block
+    // These variables will be available as masked environment variables throughout the pipeline.
     environment {
-        POSTGRES_SECRET_USR = credentials('postgres_user')
-        POSTGRES_SECRET_PSW = credentials('postgres_password')
+        POSTGRES_USER = credentials('postgres_user')
+        POSTGRES_PASSWORD = credentials('postgres_password') // Renamed for clarity in Python
+        // Add the Podman VM IP here if you are using Solution 1
+        # PODMAN_HOST_IP = '192.168.10.1' // <-- Uncomment and set your actual Podman VM IP
     }
 
     stages {
@@ -18,6 +23,14 @@ pipeline {
             steps {
                 sh '''
                 . .venv/bin/activate
+                
+                # Use $POSTGRES_USER and $POSTGRES_PASSWORD set in the environment block
+                # and explicitly pass them to the execution script/environment if needed, 
+                # but since they are global 'environment' variables, they should be inherited.
+                
+                export POSTGRES_USER="${POSTGRES_USER}"
+                export POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+                
                 export PYTHONPATH=$PYTHONPATH:"$WORKSPACE/PyTest DQ Framework"
                 python "PyTest DQ Framework/scripts/run_dq_checks.py"
                 '''
@@ -28,6 +41,16 @@ pipeline {
             steps {
                 sh '''
                 . .venv/bin/activate
+                
+                # --- CRITICAL FIXES FOR PYTEST ---
+                # 1. Pass Credentials: Expose the user/password to Python's environment
+                export POSTGRES_USER="${POSTGRES_USER}"
+                export POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+                
+                # 2. Fix Host Networking: If using Solution 1, expose the IP (Uncomment below)
+                # export PODMAN_HOST_IP="${PODMAN_HOST_IP}"
+                # ---------------------------------
+                
                 export PYTHONPATH=$PYTHONPATH:"$WORKSPACE/PyTest DQ Framework"
                 pytest "PyTest DQ Framework/tests" --html=html_report/report.html
                 '''
