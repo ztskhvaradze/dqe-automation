@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
         POSTGRES_SECRET_USR = credentials('postgres_user')
         POSTGRES_SECRET_PSW = credentials('postgres_password')
@@ -10,22 +9,17 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                    python3 -m venv .venv
-                    . .venv/bin/activate
-                    .venv/bin/pip install --upgrade pip
-                    .venv/bin/pip install -r "PyTest DQ Framework/requirements.txt"
-                '''
+                sh 'python3 -m venv .venv'
+                sh '. .venv/bin/activate && pip install -r "PyTest DQ Framework/requirements.txt"'
             }
         }
 
         stage('Run DQ Checks Script') {
             steps {
                 sh '''
-                    . .venv/bin/activate
-                    export PYTHONPATH="$PYTHONPATH:$(pwd)/PyTest DQ Framework"
-
-                    .venv/bin/python "PyTest DQ Framework/scripts/run_dq_checks.py"
+                . .venv/bin/activate
+                export PYTHONPATH=$PYTHONPATH:"$WORKSPACE/PyTest DQ Framework"
+                python "PyTest DQ Framework/scripts/run_dq_checks.py"
                 '''
             }
         }
@@ -33,16 +27,9 @@ pipeline {
         stage('Run Pytests') {
             steps {
                 sh '''
-                    . .venv/bin/activate
-                    export PYTHONPATH="$PYTHONPATH:$(pwd)/PyTest DQ Framework"
-
-                    .venv/bin/pytest "PyTest DQ Framework/tests" \
-                        --db_host="postgres" \
-                        --db_port="5432" \
-                        --db_name="mydatabase" \
-                        --db_user="$POSTGRES_SECRET_USR" \
-                        --db_password="$POSTGRES_SECRET_PSW" \
-                        --html=html_report/report.html
+                . .venv/bin/activate
+                export PYTHONPATH=$PYTHONPATH:"$WORKSPACE/PyTest DQ Framework"
+                pytest "PyTest DQ Framework/tests" --html=html_report/report.html
                 '''
             }
         }
