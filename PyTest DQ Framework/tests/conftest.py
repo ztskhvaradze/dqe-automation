@@ -1,11 +1,9 @@
 import pytest
+import os # <-- Import the os module to access environment variables
 from src.connectors.postgres.postgres_connector import PostgresConnectorContextManager
 from src.connectors.file_system.parquet_reader import ParquetReader
 import pandas as pd
 
-
-import pytest
-from src.connectors.postgres.postgres_connector import PostgresConnectorContextManager
 
 @pytest.fixture(scope="session")
 def db_connection():
@@ -13,7 +11,14 @@ def db_connection():
     host = "localhost"
     db_name = "mydatabase"
     user = "myuser"
-    password = "mypassword"
+    
+    # --- CHANGE START ---
+    # Retrieve the password from an environment variable.
+    # We use a placeholder 'default_secret' only for local testing if the variable isn't set.
+    # In Jenkins, this must be set by the 'withCredentials' block.
+    password = os.environ.get("POSTGRES_PASSWORD", "default_secret") 
+    # --- CHANGE END ---
+    
     port = 5434
 
     with PostgresConnectorContextManager(
