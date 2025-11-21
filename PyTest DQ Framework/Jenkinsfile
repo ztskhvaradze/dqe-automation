@@ -1,26 +1,48 @@
 pipeline {
     agent any
+
     environment {
         POSTGRES_SECRET_USR = credentials('postgres_user')
         POSTGRES_SECRET_PSW = credentials('postgres_password')
     }
+
     stages {
+
         stage('Install Dependencies') {
             steps {
-                sh 'python3 -m venv .venv'
-                sh 'pip install -r "PyTest DQ Framework/requirements.txt"'
+                sh '''
+                    python3 -m venv .venv
+                    . .venv/bin/activate
+                    .venv/bin/pip install --upgrade pip
+                    .venv/bin/pip install -r "PyTest DQ Framework/requirements.txt"
+                '''
             }
         }
+
         stage('Run DQ Checks') {
             steps {
-                sh '. .venv/bin/activate && python -m scripts.run_dq_checks'
+                sh '''
+                    . .venv/bin/activate
+                    .venv/bin/python -m scripts.run_dq_checks
+                '''
             }
         }
+
         stage('Run Pytest') {
             steps {
-                sh '. .venv/bin/activate && pytest tests -m "parquet_data" --db_host="postgres" --db_port="5432" --db_name="mydatabase" --db_user="$POSTGRES_SECRET_USR" --db_password="$POSTGRES_SECRET_PSW" --html=html_report/report.html'
+                sh '''
+                    . .venv/bin/activate
+                    .venv/bin/pytest tests -m "parquet_data" \
+                        --db_host="postgres" \
+                        --db_port="5432" \
+                        --db_name="mydatabase" \
+                        --db_user="$POSTGRES_SECRET_USR" \
+                        --db_password="$POSTGRES_SECRET_PSW" \
+                        --html=html_report/report.html
+                '''
             }
         }
+
         stage('Archive Reports') {
             steps {
                 archiveArtifacts artifacts: 'html_report/**', allowEmptyArchive: true
