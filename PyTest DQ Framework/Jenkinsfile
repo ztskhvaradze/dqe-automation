@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+    environment {
+        POSTGRES_SECRET_USR = credentials('postgres_user')
+        POSTGRES_SECRET_PSW = credentials('postgres_password')
+    }
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                sh 'python -m venv .venv'
+                sh '. .venv/bin/activate && pip install -r requirements.txt'
+            }
+        }
+        stage('Run DQ Checks') {
+            steps {
+                sh '. .venv/bin/activate && python -m scripts.run_dq_checks'
+            }
+        }
+        stage('Run Pytest') {
+            steps {
+                sh '. .venv/bin/activate && pytest tests -m "parquet_data" --db_host="postgres" --db_port="5432" --db_name="mydatabase" --db_user="$POSTGRES_SECRET_USR" --db_password="$POSTGRES_SECRET_PSW" --html=html_report/report.html'
+            }
+        }
+        stage('Archive Reports') {
+            steps {
+                archiveArtifacts artifacts: 'html_report/**', allowEmptyArchive: true
+            }
+        }
+    }
+}
