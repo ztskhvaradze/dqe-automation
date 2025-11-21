@@ -3,3 +3,4 @@ pytest
 pandas
 pyarrow
 openpyxl
+pytest-html
