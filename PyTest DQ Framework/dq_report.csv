@@ -1,0 +1,5 @@
+dataset,check,result
+PostgreSQL Table,not_empty,PASS
+PostgreSQL Table,required_columns,"FAIL: Missing required columns: {'value', 'name'}"
+Parquet File,not_empty,PASS
+Parquet File,required_columns,PASS
