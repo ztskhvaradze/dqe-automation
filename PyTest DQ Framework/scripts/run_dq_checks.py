@@ -9,17 +9,17 @@ import os
 # Configuration
 # -----------------------------
 POSTGRES_CONFIG = {
-    "db_host": "localhost",
+    "db_host": "postgres",   # container service name
     "db_name": "mydatabase",
     "db_user": "myuser",
     "db_password": "mypassword",
-    "db_port": 5434
+    "db_port": 5432
 }
 
 # Replace these with your actual parquet files
-FACILITIES_PARQUET_PATH = "/parquet_data/facility_type_avg_time_spent_per_visit_date/facilities.parquet"
-PATIENTS_PARQUET_PATH   = "/parquet_data/patient_sum_treatment_cost_per_facility_type/patients.parquet"
-VISITS_PARQUET_PATH     = "/parquet_data/facility_name_min_time_spent_per_visit_date/visits.parquet"
+FACILITIES_PARQUET_PATH = "/parquet_data/facility_type_avg_time_spent_per_visit_date"
+PATIENTS_PARQUET_PATH   = "/parquet_data/patient_sum_treatment_cost_per_facility_typet"
+VISITS_PARQUET_PATH     = "/parquet_data/facility_name_min_time_spent_per_visit_date"
 
 REPORT_FILE_PATH = "dq_report.csv"
 
