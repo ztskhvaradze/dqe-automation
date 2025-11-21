@@ -18,7 +18,7 @@ POSTGRES_CONFIG = {
 
 # Replace these with your actual parquet files
 FACILITIES_PARQUET_PATH = "/parquet_data/facility_type_avg_time_spent_per_visit_date"
-PATIENTS_PARQUET_PATH   = "/parquet_data/patient_sum_treatment_cost_per_facility_typet"
+PATIENTS_PARQUET_PATH   = "/parquet_data/patient_sum_treatment_cost_per_facility_type"
 VISITS_PARQUET_PATH     = "/parquet_data/facility_name_min_time_spent_per_visit_date"
 
 REPORT_FILE_PATH = "dq_report.csv"
