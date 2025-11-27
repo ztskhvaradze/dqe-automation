@@ -3,6 +3,7 @@ import os
 import csv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -32,7 +33,6 @@ class WebDriverContext:
 # ----------------------------------------------
 if __name__ == "__main__":
 
-    # Change path to your report.html
     folder_path = r"C:\Users\ZaurTskhvaradze\Jenkins_Reports"
     file_name = "report.html"
     file_path = os.path.join(folder_path, file_name)
@@ -41,211 +41,146 @@ if __name__ == "__main__":
         print(f"Opening file: {file_path}")
         driver.get(f"file:///{file_path}")
 
-        # Wait for Plotly to load
+        wait = WebDriverWait(driver, 10)
+        actions = ActionChains(driver)
+
         time.sleep(2)
 
         # ============================================================
-        # STEP 2: Extract PLOTLY SVG TABLE
+        # STEP 2: Extract PLOTLY TABLE
         # ============================================================
         try:
             print("\nExtracting Plotly SVG Table...")
-
-            # wait a bit for JS to render table
             time.sleep(2)
 
-            # Extract all <text> elements inside the table
+            # Extract table text
             script = """
                 const table = document.querySelector('g.table');
-                if (!table) { return null; }
-
-                const texts = Array.from(table.querySelectorAll('text'))
-                                .map(node => node.textContent.trim());
-                return texts;
+                if (!table) return null;
+                return Array.from(table.querySelectorAll('text')).map(t => t.textContent.trim());
             """
-
             texts = driver.execute_script(script)
 
             if not texts:
-                raise Exception("Could not locate Plotly table text via JS extraction")
+                raise Exception("Table not found")
 
             print(f"DEBUG: Extracted {len(texts)} raw text items")
 
-            # Next, extract number of columns
+            # Count columns
             script_cols = """
-                const cols = document.querySelectorAll('g.y-column');
-                return cols.length;
+                return document.querySelectorAll('g.y-column').length;
             """
             col_count = driver.execute_script(script_cols)
 
             print(f"DEBUG: Detected {col_count} Plotly columns")
 
-            if col_count == 0:
-                raise Exception("Could not detect y-column groups in Plotly table")
-
-            # Split texts into columns
             rows_per_col = len(texts) // col_count
-
             columns = []
+
             for i in range(col_count):
                 start = i * rows_per_col
                 end = start + rows_per_col
                 columns.append(texts[start:end])
 
-            # headers:
             headers = [col[0] for col in columns]
-
-            # rows:
             rows = list(zip(*[col[1:] for col in columns]))
 
-            # Save CSV
             csv_path = os.path.join(folder_path, "table.csv")
             with open(csv_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(headers)
                 writer.writerows(rows)
 
-            print(f"✔ Table extracted successfully → {csv_path}")
+            print(f"✔ Saved table.csv → {csv_path}")
 
         except Exception as e:
             print(f"❌ Table extraction failed: {e}")
 
         # ============================================================
-        # STEP 3A: Locate doughnut chart container
+        # STEP 3A: Locate chart container
         # ============================================================
         try:
             print("\nLocating doughnut chart...")
-
-            wait = WebDriverWait(driver, 10)
-
-            # Locate the chart (Plotly container)
-            chart = wait.until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, "div.js-plotly-plot")
-                )
-            )
-
+            chart = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.js-plotly-plot")))
             print("✔ Doughnut chart container found.")
-
         except Exception as e:
             print(f"❌ Failed to locate doughnut chart: {e}")
 
         # ============================================================
-        # STEP 3B: Locate doughnut chart filter items (legend entries)
+        # STEP 3C: Count slices (actual filters)
         # ============================================================
         try:
-            print("\nLocating doughnut chart filters...")
-
-            # Filter items are inside the legend:
-            script_filters = """
-                const legendItems = document.querySelectorAll('g.legend g.legenditem, g.legend g.traces g.legend-item, g.legend g.legend-item');
-                return Array.from(legendItems).map(item => item.textContent.trim());
-            """
-
-            filters = driver.execute_script(script_filters)
-
-            if not filters or len(filters) == 0:
-                raise Exception("No legend filter items found. The doughnut chart may not have interactive filters.")
-
-            print(f"✔ Found {len(filters)} filter items: {filters}")
-
-        except Exception as e:
-            print(f"❌ Failed to locate doughnut chart filters: {e}")
-
-        # ============================================================
-        # STEP 3C: Locate all doughnut chart slices (actual filters)
-        # ============================================================
-        try:
-            print("\nLocating doughnut chart slices (filters)...")
-
+            print("\nLocating doughnut chart slices...")
             script_slices = """
-                const slices = document.querySelectorAll('g.pielayer g.slice');
-                return slices.length;
+                return document.querySelectorAll('g.pielayer g.slice').length;
             """
             slice_count = driver.execute_script(script_slices)
 
-            print(f"✔ Found {slice_count} slices in the doughnut chart.")
+            print(f"✔ Found {slice_count} slices")
 
             if slice_count == 0:
-                raise Exception("No slices found in the doughnut chart.")
+                raise Exception("No slices found")
 
         except Exception as e:
             print(f"❌ Failed to detect slices: {e}")
 
         # ============================================================
-        # STEP 3D: Take screenshot0 (initial doughnut chart state)
+        # STEP 3D: Screenshot0 (initial)
         # ============================================================
         try:
-            print("\nTaking screenshot0 (initial chart)...")
-
+            print("\nTaking screenshot0...")
             screenshot_path = os.path.join(folder_path, "screenshot0.png")
-
-            # Take full-page screenshot
             driver.save_screenshot(screenshot_path)
-
             print(f"✔ Saved screenshot0 → {screenshot_path}")
-
         except Exception as e:
             print(f"❌ Failed to take screenshot0: {e}")
 
         # ============================================================
-        # STEP 3E: Iterate through slices, click, screenshot, extract data
+        # STEP 3E: Iterate slices → hover → screenshot → CSV
         # ============================================================
         try:
-            print("\nIterating through doughnut slices...")
+            print("\nIterating through slices with hover tooltips...")
 
-            # 1. Get all slices (JS returns actual DOM nodes)
-            script_get_slices = """
-                return Array.from(document.querySelectorAll('g.pielayer g.slice'));
-            """
-            slice_elements = driver.execute_script(script_get_slices)
-            total_slices = len(slice_elements)
-
-            if total_slices == 0:
-                raise Exception("No slices found during iteration.")
-
-            print(f"✔ Ready to iterate through {total_slices} slices")
-
-            # 2. Loop through slices
-            for i in range(total_slices):
+            for i in range(slice_count):
                 print(f"\n--- Processing slice {i} ---")
 
-                # 2a. Click slice using JS
-                script_click = f"""
-                    const slices = Array.from(document.querySelectorAll('g.pielayer g.slice'));
+                # 1. Get slice center coordinates for hovering
+                script_coords = f"""
+                    const slices = document.querySelectorAll('g.pielayer g.slice');
                     const path = slices[{i}].querySelector('path.surface');
-                    path.dispatchEvent(new MouseEvent('click', {{bubbles:true}}));
+                    const r = path.getBoundingClientRect();
+                    return {{x: r.x + r.width/2, y: r.y + r.height/2}};
                 """
-                driver.execute_script(script_click)
+                coords = driver.execute_script(script_coords)
+                x, y = coords['x'], coords['y']
 
-                time.sleep(1)  # small delay so chart updates
+                # 2. Move mouse to slice to trigger tooltip
+                actions.move_by_offset(x, y).perform()
+                time.sleep(0.7)
 
-                # 2b. Take screenshotN
+                # 3. ScreenshotN
                 screenshot_path = os.path.join(folder_path, f"screenshot{i+1}.png")
                 driver.save_screenshot(screenshot_path)
-                print(f"✔ Saved screenshot → {screenshot_path}")
+                print(f"✔ Saved screenshot{i+1} → {screenshot_path}")
 
-                # 2c. Extract label + value from the slice
+                # 4. Move mouse back to prevent offset accumulation
+                actions.move_by_offset(-x, -y).perform()
+
+                # 5. Extract slice text
                 script_extract = f"""
                     const slice = document.querySelectorAll('g.pielayer g.slice')[{i}];
                     const txt = slice.querySelector('g.slicetext text');
                     if (!txt) return null;
-
-                    const raw = txt.getAttribute('data-unformatted');
-                    return raw;  // usually "Clinic<br>28"
+                    return txt.getAttribute('data-unformatted');
                 """
-                raw_text = driver.execute_script(script_extract)
+                raw = driver.execute_script(script_extract)
+                if not raw:
+                    raise Exception(f"Could not read label for slice {i}")
 
-                if not raw_text:
-                    raise Exception(f"Could not extract text from slice {i}")
+                label, value = raw.split("<br>")
+                print(f"✔ Slice data: {label}, {value}")
 
-                # Parse: "Clinic<br>28" → ["Clinic", "28"]
-                parts = raw_text.split("<br>")
-                label = parts[0]
-                value = parts[1]
-
-                print(f"✔ Extracted slice data: {label}, {value}")
-
-                # 2d. Save CSV as doughnutN.csv
+                # 6. Save CSV
                 csv_path = os.path.join(folder_path, f"doughnut{i}.csv")
                 with open(csv_path, "w", newline="", encoding="utf-8") as f:
                     writer = csv.writer(f)
@@ -255,8 +190,4 @@ if __name__ == "__main__":
                 print(f"✔ Saved CSV → {csv_path}")
 
         except Exception as e:
-            print(f"❌ Error during slice iteration: {e}")
-
-
-
-
+            print(f"❌ Slice iteration failed: {e}")
