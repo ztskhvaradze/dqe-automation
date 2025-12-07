@@ -1,5 +1,0 @@
-robotframework
-robotframework-seleniumlibrary
-pandas
-pyarrow
-selenium
