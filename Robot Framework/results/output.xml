@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.3.2 (Python 3.10.0 on win32)" generated="2025-12-07T16:06:26.144766" rpa="false" schemaversion="5">
+<suite id="s1" name="Test" source="C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\test.robot">
+<test id="s1-t1" name="Validate HTML Table Against Parquet" line="12">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2025-12-07T16:06:26.715849" level="INFO">Opening browser 'chrome' to base url 'about:blank'.</msg>
+<arg>about:blank</arg>
+<arg>chrome</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2025-12-07T16:06:26.715849" elapsed="4.121351"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2025-12-07T16:06:30.838197" elapsed="0.038887"/>
+</kw>
+<kw name="Extract Plotly Table" owner="helper">
+<msg time="2025-12-07T16:06:35.420319" level="INFO">${df_html} =        Facility Type  Visit Date  Average Time Spent
+0   Specialty Center  2025-11-21               35.00
+1           Hospital  2025-11-21               52.00
+2             Clinic  2025-11-21         ...</msg>
+<var>${df_html}</var>
+<arg>${REPORT_PATH}</arg>
+<status status="PASS" start="2025-12-07T16:06:30.878665" elapsed="4.541654"/>
+</kw>
+<kw name="Load Parquet Df" owner="helper">
+<msg time="2025-12-07T16:06:35.522476" level="INFO">${df_parquet} =        Facility Type  Visit Date  Average Time Spent
+0   Specialty Center  2025-11-21               35.00
+1           Hospital  2025-11-21               52.00
+2             Clinic  2025-11-21         ...</msg>
+<var>${df_parquet}</var>
+<arg>${PARQUET_DIR}</arg>
+<doc>Reads all .parquet files from the given directory and concatenates them into a single DataFrame.</doc>
+<status status="PASS" start="2025-12-07T16:06:35.421319" elapsed="0.101667"/>
+</kw>
+<kw name="Sort Dataframe" owner="helper">
+<msg time="2025-12-07T16:06:35.530639" level="INFO">C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:175: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_numeric(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:178: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_datetime without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_datetime(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:178: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df[col] = pd.to_datetime(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:175: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_numeric(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:178: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_datetime without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_datetime(df[col], errors='ignore')</msg>
+<msg time="2025-12-07T16:06:35.537728" level="INFO">${df_html} =        Facility Type Visit Date  Average Time Spent
+0             Clinic 2025-11-15               35.00
+1             Clinic 2025-11-16               41.00
+2             Clinic 2025-11-17             ...</msg>
+<var>${df_html}</var>
+<arg>${df_html}</arg>
+<arg>Facility Type</arg>
+<arg>Visit Date</arg>
+<doc>Sort pandas DataFrame by given columns (numeric-safe) and reset index.</doc>
+<status status="PASS" start="2025-12-07T16:06:35.523539" elapsed="0.014189"/>
+</kw>
+<kw name="Sort Dataframe" owner="helper">
+<msg time="2025-12-07T16:06:35.542536" level="INFO">C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:175: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_numeric(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:178: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_datetime without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_datetime(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:178: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df[col] = pd.to_datetime(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:175: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_numeric(df[col], errors='ignore')
+C:\Users\ZaurTskhvaradze\cloned_repos\dqe-automation\Robot Framework\helper.py:178: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_datetime without passing `errors` and catch exceptions explicitly instead
+  df[col] = pd.to_datetime(df[col], errors='ignore')</msg>
+<msg time="2025-12-07T16:06:35.550106" level="INFO">${df_parquet} =        Facility Type Visit Date  Average Time Spent
+0             Clinic 2025-11-15               31.00
+1             Clinic 2025-11-16               43.50
+2             Clinic 2025-11-17             ...</msg>
+<var>${df_parquet}</var>
+<arg>${df_parquet}</arg>
+<arg>Facility Type</arg>
+<arg>Visit Date</arg>
+<doc>Sort pandas DataFrame by given columns (numeric-safe) and reset index.</doc>
+<status status="PASS" start="2025-12-07T16:06:35.538280" elapsed="0.011826"/>
+</kw>
+<kw name="Compare Dataframes" owner="helper">
+<msg time="2025-12-07T16:06:35.566131" level="INFO">${diff} = ["Row 0, Column 'Average Time Spent': HTML=35.0 | PARQUET=31.0", "Row 1, Column 'Average Time Spent': HTML=41.0 | PARQUET=43.5", "Row 2, Column 'Average Time Spent': HTML=40.67 | PARQUET=42.0", "Row 6...</msg>
+<var>${diff}</var>
+<arg>${df_html}</arg>
+<arg>${df_parquet}</arg>
+<status status="PASS" start="2025-12-07T16:06:35.551567" elapsed="0.014564"/>
+</kw>
+<kw name="Should Be Empty" owner="BuiltIn">
+<msg time="2025-12-07T16:06:35.570582" level="INFO">Length is 8.</msg>
+<msg time="2025-12-07T16:06:35.570582" level="FAIL">Differences found between HTML and Parquet dataset.</msg>
+<arg>${diff}</arg>
+<arg>Differences found between HTML and Parquet dataset.</arg>
+<doc>Verifies that the given item is empty.</doc>
+<status status="FAIL" start="2025-12-07T16:06:35.570074" elapsed="0.000508">Differences found between HTML and Parquet dataset.</status>
+</kw>
+<status status="FAIL" start="2025-12-07T16:06:26.713855" elapsed="8.860869">Differences found between HTML and Parquet dataset.</status>
+</test>
+<kw name="Close All Browsers" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2025-12-07T16:06:35.587361" elapsed="2.226228"/>
+</kw>
+<status status="FAIL" start="2025-12-07T16:06:26.145765" elapsed="11.668484"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Test" id="s1" pass="0" fail="1" skip="0">Test</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
